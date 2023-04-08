@@ -5,6 +5,23 @@ import pandas as pd
 
 
 def fit_gp(df_partial, party):
+    """
+    Fits a Gaussian Process on the polling data of a single party.
+
+    Parameters
+    ----------
+    df_partial: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    party: str
+        The name of the party for which to fit the GP.
+
+    Returns
+    -------
+            : pandas.dataframe
+        A pandas dataframe with two columns party_mean | party_std containing the regressed mean and standard deviation
+        respectively.
+    """
 
     df_partial['Date'] = pd.to_datetime(df_partial['Date'])
     df_partial['Date_delta'] = (df_partial['Date'] - df_partial['Date'].min()) / np.timedelta64(1, 'D')
@@ -25,6 +42,29 @@ def fit_gp(df_partial, party):
 
 
 def get_regression(df_partial, party, start_date=None, end_date=None):
+    """
+    Fits a Gaussian Process on the polling data of a single party. The difference with fit_gp is that regressed values
+    are returned for every day withing the specified range, as opposed to only returning values when polls are
+    available.
+
+    Parameters
+    ----------
+    df_partial: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    party: str
+        The name of the party for which to fit the GP.
+    start_date: str
+        The starting date to compute the regression. Should be of the form 'YYYY-MM-DD'.
+    end_date: str
+        The ending date to compute the regression. Should be of the form 'YYYY-MM-DD'.
+
+    Returns
+    -------
+    d: pandas.dataframe
+        A pandas dataframe with two columns party_mean | party_std containing the regressed mean and standard deviation
+        respectively.
+    """
 
     df_partial['Date'] = pd.to_datetime(df_partial['Date'])
     df_partial['Date_delta'] = (df_partial['Date'] - df_partial['Date'].min()) / np.timedelta64(1, 'D')
@@ -54,6 +94,22 @@ def get_regression(df_partial, party, start_date=None, end_date=None):
 
 
 def remove_defunct_parties(df):
+    """
+    Looks for parties that haven't been polled recently and removes them from the dataframe. Useful for countries where
+    not much information is readily available about whether a party has recently ceased operations.
+
+    Parameters
+    ----------
+    df: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+
+    Returns
+    -------
+    df: pandas.dataframe
+        A pandas dataframe with defunct parties removed. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    """
 
     all_parties = set(df.columns) - set(['Date', 'Polling Firm', 'Commissioner', 'Sample Size', 'Others'])
 
@@ -66,6 +122,23 @@ def remove_defunct_parties(df):
 
 
 def compute_all_bias(df, agent='Polling Firm'):
+    """
+    Computes the bias of either Polling Firms or Commissioners.
+
+    Parameters
+    ----------
+    df: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    agent: str
+        The type of agent for which to compute the bias this is either 'Polling Firm' or 'Commissioner'.
+
+    Returns
+    -------
+    bias_matrix: pandas.dataframe
+        A pandas.dataframe object that containes all the biases. Rows are different agents, columns are the political
+        parties.
+    """
 
     all_parties = set(df.columns) - set(['Date', 'Polling Firm', 'Commissioner', 'Sample Size', 'Others'])
 
@@ -92,6 +165,26 @@ def compute_all_bias(df, agent='Polling Firm'):
 
 
 def debias(df, bias_matrix, agent='Polling Firm'):
+    """
+    Debiases the polling estimates.
+
+    Parameters
+    ----------
+    df: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    bias_matrix: pandas.dataframe
+        A pandas.dataframe object that containes all the biases. Rows are different agents, columns are the political
+        parties.
+    agent: str
+        The type of agent for which to compute the bias this is either 'Polling Firm' or 'Commissioner'.
+
+    Returns
+    -------
+    df: pandas.dataframe
+        A pandas dataframe containing the debiased polling data for the different political parties. The dataframe
+        structure has to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    """
 
     for pollster in bias_matrix.index:
         for party in bias_matrix.columns:
@@ -102,6 +195,25 @@ def debias(df, bias_matrix, agent='Polling Firm'):
 
 
 def compute_regression(df, start_date=None, end_date=None):
+    """
+    Computes a regression for all days within the specified time interval and for all available parties.
+
+    Parameters
+    ----------
+    df: pandas.dataframe
+        A pandas dataframe containing the polling data for the different political parties. The dataframe structure has
+        to be Date | Polling Firm | Commissioner | Sample Size | {Party Names} | Others.
+    start_date: str
+        The starting date to compute the regression. Should be of the form 'YYYY-MM-DD'.
+    end_date: str
+        The ending date to compute the regression. Should be of the form 'YYYY-MM-DD'.
+
+    Returns
+    -------
+    regressed: pandas.dataframe
+        A pandas dataframe with columns {party}_mean | {party}_std containing the regressed mean and standard deviation
+        respectively for all days within the specified interval, and for all available parties.
+    """
 
     all_parties = set(df.columns) - set(['Date', 'Polling Firm', 'Commissioner', 'Sample Size', 'Others'])
 
