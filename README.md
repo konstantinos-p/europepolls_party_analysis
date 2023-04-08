@@ -3,7 +3,7 @@
 These functions can be used to analyse polling data. In particular, one can compute trend lines with Gaussian Processes 
 compute the bias of pollsters and poll commissioners, and finally debias available polls.
 
-<h2> :red_book: Usage.</h2>
+<h2> :dizzy: Usage.</h2>
 The usage of each function is explained in detail analysis_utils.py.
 
 <h2> :blue_book: Format.</h2>
