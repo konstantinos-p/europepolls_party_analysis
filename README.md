@@ -3,7 +3,17 @@
 These functions can be used to analyse polling data. In particular, one can compute trend lines with Gaussian Processes 
 compute the bias of pollsters and poll commissioners, and finally debias available polls.
 
-<h2> :dizzy: Usage.</h2>
+<h2> :dizzy: Example usage.</h2>
+
+```
+df = pd.read_csv('greece_cleaned.csv', index_col=0)
+df = remove_defunct_parties(df)
+bias_matrix = compute_all_bias(df.copy(), agent='Polling Firm')
+debiased_df = debias(df.copy(), bias_matrix)
+regressed = compute_regression(debiased_df)
+```
+
+
 The usage of each function is explained in detail analysis_utils.py.
 
 <h2> :blue_book: Format.</h2>
